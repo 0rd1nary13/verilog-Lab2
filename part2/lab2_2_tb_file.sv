@@ -34,6 +34,7 @@ module lab2_2_tb_file #(parameter NS = 60, NH = 24);
                .Buzz              );             
 
   initial begin
+    $dumpfile("dump.vcd"); $dumpvars;
     $monitor("buzz = %b  at time %t",Buzz,$time);
 	#  2us  Reset    = 'b0;
 	#  1us  Timeset  = 'b1;	 // set clock (real) time
@@ -57,7 +58,7 @@ module lab2_2_tb_file #(parameter NS = 60, NH = 24);
 	        Dayadv   = 'b1;	
 	#  6us  Dayadv   = 'b0;	// day 6
     $display("alarm should read day=6, time = 08:02");
-	        Alarmset = 'b0;
+	        Alarmset = 'b0;	
     lab2_2_display_tb_file (.seg_j(D0disp), .seg_d(H1disp),
     .seg_e(H0disp), .seg_f(M1disp),
     .seg_g(M0disp), .seg_h(S1disp),
