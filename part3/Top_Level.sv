@@ -84,31 +84,67 @@ module Top_Level #(parameter NS=60, NH=24, ND=7, NM=12)(
     .ct_out(THrs), .ct_max(H_max));
 
 
-// days counter -- runs at either 1/sec or 1/24hr
+// days (of the week) counter -- runs at either 1/sec or 1/24hr
   ct_mod_N Dct(
     //input ports
     .clk(Pulse), .rst(Reset), .en(TDen), .modulus(7'(ND)),
     //output ports
-    .ct_out(TDay), .ct_max(D_max) //we might want a carry out, 7days -> week
+    .ct_out(TDay), .ct_max()
   	);
 
- // Date and Month tracking
-  always_ff @(posedge Pulse or posedge Reset) begin
-    if (Reset) begin
-      TDate <= 1;
-      TMonth <= 1;
-    end else if (TDen) begin // TDen already handles button OR real time
-      if (TDate == max_days_in_month(TMonth)) begin
-        TDate <= 1;
-        if (TMonth == 12)
-          TMonth <= 1;
-        else
-          TMonth <= TMonth + 1;
-      end else begin
-        TDate <= TDate + 1;
-      end
-    end
+
+
+// Date Counter
+  logic [5:0] D31, D30, D29;
+  logic DReset = Reset;
+  logic D31_max, D30_max, D29_max;
+
+  ct_mod_N D31ct(
+    //input ports
+    .clk(Pulse), .rst(DReset), .en(TNen), .modulus(7'(31)),
+    //output ports
+    .ct_out(D31), .ct_max(D31_max)
+  );
+
+  ct_mod_N D30ct(
+    //input ports
+    .clk(Pulse), .rst(DReset), .en(TNen), .modulus(7'(30)),
+    //output ports
+    .ct_out(D30), .ct_max(D30_max)
+  );
+
+  ct_mod_N D29ct(
+    //input ports
+    .clk(Pulse), .rst(DReset), .en(TNen), .modulus(7'(29)),
+    //output ports
+    .ct_out(D29), .ct_max(D29_max)
+  );
+
+  always_comb begin
+    if (TDate > max_days_in_month(TMonth))
+      DReset <= 1;
+    case (max_days_in_month(TMonth))
+      29:
+        D_max = D29_max;
+        TDate = D29;
+      30:
+        D_max = D30_max;
+        TDate = D30; 
+      31:
+        D_max = D31_max;
+        TDate = D31;
+    endcase
   end
+
+//Month counter
+  ct_mod_N  Tct(
+    //input ports
+    .clk(Pulse), .rst(Reset), .en(TTen), .modulus(7'(NM)),
+    //output ports
+    .ct_out(TMonth), .ct_max()
+  );
+
+
 
 //------------------ Time Counters End ------------------
 
