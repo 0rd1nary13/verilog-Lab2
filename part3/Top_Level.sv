@@ -25,8 +25,9 @@ module Top_Level #(parameter NS=60, NH=24, ND=7, NM=12)(
   logic[6:0] TSec, TMin, THrs, TDay,     // clock/time 
              AMin, AHrs, ADay;		   // alarm setting
   logic[6:0] Min, Hrs, Day;
-  logic S_max, M_max, H_max, D_max, 	   // "carry out" from sec -> min, min -> hrs, hrs -> days
-        TMen, THen, TDen, AMen, AHen, ADen; 
+  logic S_max, M_max, H_max, D_max, 	   // "carry out" from sec -> min, min -> hrs, hrs -> date -> Month
+        TMen, THen, TDen, AMen, AHen, ADen,
+        TTen, TNen ; // (N) Date Enable & (T) Month enable
   logic alarm_trigger;             // alarm internal trigger signal
 
 // Date and Month Variables
@@ -46,11 +47,13 @@ module Top_Level #(parameter NS=60, NH=24, ND=7, NM=12)(
 // T: time, A: Alarm, en:enable, eg: TMen: Time Minute Enable
   assign TMen = (Timeset & Minadv) | (!Timeset & S_max);  // Minute counter enable
   assign THen = (Timeset & Hrsadv) | (!Timeset & S_max & M_max);  // Hour counter enable - increment when both sec & min are max
-  assign TDen = (Timeset & Dayadv) | (!Timeset & S_max & M_max & H_max); // Day counter enable
+  assign TDen = (Timeset & Dayadv) | (!Timeset & S_max & M_max & H_max); // Day counter en
+  assign TNen = (Timeset & Datadv) | (!Timeset & S_max & M_max & H_max); // Date counter en
+  assign TTen = (Timeset & Monadv) | (!Timeset & D_max & S_max & M_max & H_max); //Month counter en
+  
   assign AMen = Alarmset & Minadv;           // Alarm minute setting enable
   assign AHen = Alarmset & Hrsadv;           // Alarm hour setting enable
   assign ADen = Alarmset & Dayadv;           // Alarm day setting enable
-  
 // Time or alarm display selection
   assign Min = Alarmset? AMin : TMin;        // Display minutes (time or alarm)
   assign Hrs = Alarmset? AHrs : THrs;        // Display hours (time or alarm)
@@ -89,7 +92,7 @@ module Top_Level #(parameter NS=60, NH=24, ND=7, NM=12)(
     .ct_out(TDay), .ct_max(D_max) //we might want a carry out, 7days -> week
   	);
 
- // Date and month tracking
+ // Date and Month tracking
   always_ff @(posedge Pulse or posedge Reset) begin
     if (Reset) begin
       TDate <= 1;
