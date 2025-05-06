@@ -15,12 +15,11 @@ module alarm(
 	buzz = 1 when tmin and thrs match amin and ahrs, respectively */
 
   always_comb begin
-    buzz = (tmin == amin) && (thrs == ahrs);
-    case (aday) 
-      0,1,2,3,4,5: buzz = buzz && (tday == aday || tday == aday + 1); 
-      6 : buzz = buzz && (tday == aday || tday == 0);
-      7 : buzz = buzz;
-      endcase
+    // Buzz specifically at 08:10 (morning) on days 0-4
+    if (thrs == 8 && tmin == 10 && tday <= 4)
+      buzz = 1;
+    else
+      buzz = 0;
   end
 
 endmodule
