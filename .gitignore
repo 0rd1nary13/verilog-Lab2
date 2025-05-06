@@ -1,0 +1,41 @@
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Verilog/FPGA development
+*.log
+*.jou
+*.rpt
+*.vcd
+*.vcd.vpd
+*.wlf
+*.vstf
+*_tb_*
+*.dump
+
+# Simulation output directories
+sim/
+xsim/
+isim/
+work/
+transcript
+
+# Synthesis/Implementation output directories
+synth/
+impl/
+.Xil/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+
+# Backup files
+*~
+*.bak
+*.swp 
